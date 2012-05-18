@@ -28,12 +28,12 @@ class Mailer(object):
         self.sender_password = sender_password
         self.recipients = recipients
 
-    def send(self, subject, reply_to, message):
+    def send(self, comitter, subject, reply_to, message):
         if not self.recipients:
             return
 
         mime_text = MIMEText(message, _charset='utf-8')
-        mime_text['From'] = self.sender
+        mime_text['From'] = comitter
         mime_text['Reply-To'] = reply_to
         mime_text['To'] = ', '.join(self.recipients)
         mime_text['Subject'] = subject
@@ -72,13 +72,13 @@ def git_rev_parse(hash, short=False):
     return p.stdout.read()[:-1]
 
 def get_commit_info(hash):
-    p = subprocess.Popen(['git', 'show', '--pretty=format:%s%n%h', '-s', hash], 
+    p = subprocess.Popen(['git', 'show', '--pretty=format:%s%n%h%n%ce', '-s', hash], 
                          stdout=subprocess.PIPE)
     s = StringIO(p.stdout.read())
     def undefined(): 
         return 'undefined'
     info = defaultdict(undefined)
-    for k in ['message', 'hash']:
+    for k in ['message', 'hash', 'committer']:
         info[k] = s.readline().strip()
     return info
 
@@ -99,8 +99,7 @@ def process_commits(commits, mailer, subject_prefix, subject_template):
             match = re.search(r'Author: (.+)', message)
             assert match
             reply_to = match.group(1)
-            mailer.send(subject, reply_to, message)
-            
+            mailer.send(info['committer'], subject, reply_to, message)
 
 def get_commits(old_rev, new_rev):
     p = subprocess.Popen(['git', 'log', '--pretty=format:%H', '--reverse',  
