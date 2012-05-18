@@ -135,7 +135,7 @@ def get_config_variables():
     optional(EMAILPREFIX)
     optional(SMTP_SUBJECT)
     required(SMTP_HOST)
-    required(SMTP_PORT, int)
+    optional(SMTP_PORT)
     required(SMTP_SENDER)
     required(SMTP_SENDER_PASSWORD)
     recipients(MAILINGLIST)
