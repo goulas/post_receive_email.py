@@ -10,6 +10,7 @@ import sys
 import time
 import traceback
 from collections import defaultdict
+from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from StringIO import StringIO
 
@@ -31,15 +32,21 @@ class Mailer(object):
         self.sender_password = sender_password
         self.recipients = recipients
 
-    def send(self, comitter, subject, reply_to, message):
+    def send(self, comitter, subject, reply_to, message, html_message):
         if not self.recipients:
             return
 
-        mime_text = MIMEText(message, _charset='utf-8')
-        mime_text['From'] = comitter
-        mime_text['Reply-To'] = reply_to
-        mime_text['To'] = ', '.join(self.recipients)
-        mime_text['Subject'] = subject
+        msg = MIMEMultipart('alternative', _charset='utf-8')
+        msg['From'] = comitter
+        msg['Reply-To'] = reply_to
+        msg['To'] = ', '.join(self.recipients)
+        msg['Subject'] = subject
+
+        part1 = MIMEText(message, 'plain')
+        part2 = MIMEText(html_message, 'html')
+
+        msg.attach(part1)
+        msg.attach(part2)
 
         server = smtplib.SMTP(self.smtp_host, self.smtp_port)
         server.ehlo()
@@ -102,7 +109,7 @@ def process_commits(commits, mailer, subject_prefix, subject_template):
             match = re.search(r'Author: (.+)', message)
             assert match
             reply_to = match.group(1)
-            mailer.send(info['committer'], subject, reply_to, html_message)
+            mailer.send(info['committer'], subject, reply_to, message, html_message)
 
 def get_commits(old_rev, new_rev):
     p = subprocess.Popen(['git', 'log', '--pretty=format:%H', '--reverse',  
