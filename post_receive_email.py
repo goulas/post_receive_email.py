@@ -72,7 +72,7 @@ def git_rev_parse(hash, short=False):
     return p.stdout.read()[:-1]
 
 def get_commit_info(hash):
-    p = subprocess.Popen(['git', 'show', '--pretty=format:%s%n%h%n%ce', '-s', hash], 
+    p = subprocess.Popen(['git', 'show', '--pretty=format:%s%n%h%n%ce', '-s', hash],
                          stdout=subprocess.PIPE)
     s = StringIO(p.stdout.read())
     def undefined(): 
@@ -86,14 +86,10 @@ def process_commits(commits, mailer, subject_prefix, subject_template):
     for ref_name in commits.keys():
         use_index = len(commits[ref_name]) > 1
         if not subject_template:
-            subject_template = ('%(prefix)s %(ref_name)s commit ' + 
-                                ('(#%(index)s) ' if use_index else '') +
-                                '%(hash)s')
-        for i, commit in enumerate(commits[ref_name]):
+            subject_template = ('%(prefix)s [%(hash)s] %(message)s')
+        for commit in commits[ref_name]:
             info = get_commit_info(commit)
-            info['ref_name'] = ref_name
             info['prefix'] = subject_prefix
-            info['index'] = i + 1
             subject = subject_template % info
             message = git_show(commit)
             match = re.search(r'Author: (.+)', message)
