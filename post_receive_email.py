@@ -52,7 +52,11 @@ def git_config_get(name):
     p = subprocess.Popen(['git', 'config', '--get', name], 
                          stdout=subprocess.PIPE)
     # Cut off the last \n character.
-    return p.stdout.read()[:-1]
+    conf_val = p.stdout.read()[:-1]
+    if conf_val == "":
+        return None
+    else:
+        return conf_val
 
 def git_show(hash):
     p = subprocess.Popen(['git', 'show', hash], stdout=subprocess.PIPE)
