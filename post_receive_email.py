@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from __future__ import with_statement
 
 from pygments import highlight
@@ -36,7 +38,7 @@ class Mailer(object):
         if not self.recipients:
             return
 
-        msg = MIMEMultipart('alternative', _charset='utf-8')
+        msg = MIMEMultipart('alternative')
         msg['From'] = comitter
         msg['Reply-To'] = reply_to
         msg['To'] = ', '.join(self.recipients)
@@ -54,7 +56,7 @@ class Mailer(object):
         server.ehlo()
         server.login(self.sender, self.sender_password)
         server.sendmail(self.sender, self.recipients, 
-                        mime_text.as_string())
+                        msg.as_string())
         server.rset()
         server.quit()
 
@@ -93,7 +95,7 @@ def get_commit_info(hash):
     return info
 
 def format_commit_message(message):
-    return highlight(message, DiffLexer(), HtmlFormatter(full=True))
+    return highlight(message, DiffLexer(), HtmlFormatter(full=True, noclasses=True))
 
 def process_commits(commits, mailer, subject_prefix, subject_template):
     for ref_name in commits.keys():
