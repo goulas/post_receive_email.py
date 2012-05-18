@@ -139,6 +139,10 @@ def get_config_variables():
 
 def main():
     log_file_path = git_config_get(POST_RECEIVE_LOGFILE)
+
+    if not log_file_path:
+        log_file_path = "/tmp/post-receive-mail.log"
+
     with open(log_file_path, 'a') as log_file:
         try:
             config = get_config_variables()
