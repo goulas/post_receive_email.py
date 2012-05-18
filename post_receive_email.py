@@ -102,7 +102,7 @@ def process_commits(commits, mailer, subject_prefix, subject_template):
             match = re.search(r'Author: (.+)', message)
             assert match
             reply_to = match.group(1)
-            mailer.send(info['committer'], subject, reply_to, message)
+            mailer.send(info['committer'], subject, reply_to, html_message)
 
 def get_commits(old_rev, new_rev):
     p = subprocess.Popen(['git', 'log', '--pretty=format:%H', '--reverse',  
