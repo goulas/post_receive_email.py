@@ -1,5 +1,8 @@
 from __future__ import with_statement
 
+from pygments import highlight
+from pygments.lexers import DiffLexer
+from pygments.formatters import HtmlFormatter
 import re
 import smtplib
 import subprocess
@@ -82,6 +85,9 @@ def get_commit_info(hash):
         info[k] = s.readline().strip()
     return info
 
+def format_commit_message(message):
+    return highlight(message, DiffLexer(), HtmlFormatter(full=True))
+
 def process_commits(commits, mailer, subject_prefix, subject_template):
     for ref_name in commits.keys():
         use_index = len(commits[ref_name]) > 1
@@ -92,6 +98,7 @@ def process_commits(commits, mailer, subject_prefix, subject_template):
             info['prefix'] = subject_prefix
             subject = subject_template % info
             message = git_show(commit)
+            html_message = format_commit_message(message)
             match = re.search(r'Author: (.+)', message)
             assert match
             reply_to = match.group(1)
