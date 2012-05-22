@@ -95,7 +95,7 @@ def get_commit_info(hash):
     return info
 
 def format_commit_message(message):
-    return highlight(message, DiffLexer(), HtmlFormatter(full=True, noclasses=True))
+    return highlight(message, DiffLexer(), HtmlFormatter(full=True, noclasses=True, nobackground=True))
 
 def process_commits(commits, mailer, subject_prefix, subject_template):
     for ref_name in commits.keys():
