@@ -84,14 +84,22 @@ def git_rev_parse(hash, short=False):
     return p.stdout.read()[:-1]
 
 def get_commit_info(hash):
-    p = subprocess.Popen(['git', 'show', '--pretty=format:%s%n%h%n%ce', '-s', hash],
+    p = subprocess.Popen(['git', 'show', '--pretty=format:%s%n%ce', '-s', hash],
                          stdout=subprocess.PIPE)
     s = StringIO(p.stdout.read())
     def undefined(): 
         return 'undefined'
     info = defaultdict(undefined)
-    for k in ['message', 'hash', 'committer']:
+    for k in ['message', 'committer']:
         info[k] = s.readline().strip()
+    s.close()
+
+    p = subprocess.Popen(['git', 'rev-list', '--all', '--no-merges'],
+                         stdout=subprocess.PIPE)
+    s = StringIO(p.stdout.read())
+    info['revision'] = s.getvalue().count('\n')
+    s.close()
+
     return info
 
 def format_commit_message(message):
@@ -101,7 +109,7 @@ def process_commits(commits, mailer, subject_prefix, subject_template):
     for ref_name in commits.keys():
         use_index = len(commits[ref_name]) > 1
         if not subject_template:
-            subject_template = ('%(prefix)s [%(hash)s] %(message)s')
+            subject_template = ('%(prefix)s [%(revision)s] %(message)s')
         for commit in commits[ref_name]:
             info = get_commit_info(commit)
             info['prefix'] = subject_prefix
