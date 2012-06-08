@@ -107,9 +107,8 @@ def format_commit_message(message):
 
 def process_commits(commits, mailer, subject_prefix, subject_template):
     for ref_name in commits.keys():
-        use_index = len(commits[ref_name]) > 1
         if not subject_template:
-            subject_template = ('%(prefix)s [%(revision)s] %(message)s')
+            subject_template = ('[%(prefix)s] [%(revision)s] %(message)s')
         for commit in commits[ref_name]:
             info = get_commit_info(commit)
             info['prefix'] = subject_prefix
